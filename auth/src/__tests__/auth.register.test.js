@@ -1,15 +1,25 @@
 /**
- * TDD test suite for POST /auth/register
+ * TDD test suite for POST /api/auth/register
  *
  * Uses mongodb-memory-server so production DB is never touched.
  * supertest hits the actual express app in-process (no network bind needed).
  */
 
-import { describe, it, expect, beforeAll, afterAll, afterEach } from "@jest/globals";
+import {
+    describe,
+    it,
+    expect,
+    beforeAll,
+    afterAll,
+    afterEach,
+} from "@jest/globals";
 import { MongoMemoryServer } from "mongodb-memory-server";
 import mongoose from "mongoose";
+import "dotenv/config";
 import request from "supertest";
 import { app } from "../../src/app.js";
+// same mongoose instance share karta hai jo beforeAll me connect hoti hai
+import { userModel } from "../../src/models/user.model.js";
 
 // valid payload — saare required fields present
 const VALID_PAYLOAD = {
@@ -44,11 +54,13 @@ afterEach(async () => {
 
 // ── test cases ────────────────────────────────────────────────────────────────
 
-describe("POST /auth/register", () => {
+describe("POST /api/auth/register", () => {
     // ── Happy path ────────────────────────────────────────────────────────────
 
     it("should register a new user and return 201 with accessToken", async () => {
-        const res = await request(app).post("/auth/register").send(VALID_PAYLOAD);
+        const res = await request(app)
+            .post("/api/auth/register")
+            .send(VALID_PAYLOAD);
 
         expect(res.status).toBe(201);
         expect(res.body.success).toBe(true);
@@ -57,7 +69,9 @@ describe("POST /auth/register", () => {
     });
 
     it("should return the user object (without password) in the response", async () => {
-        const res = await request(app).post("/auth/register").send(VALID_PAYLOAD);
+        const res = await request(app)
+            .post("/api/auth/register")
+            .send(VALID_PAYLOAD);
 
         const { user } = res.body.data;
         expect(user).toBeDefined();
@@ -68,14 +82,16 @@ describe("POST /auth/register", () => {
     });
 
     it("should default role to USER when roles is not provided", async () => {
-        const res = await request(app).post("/auth/register").send(VALID_PAYLOAD);
+        const res = await request(app)
+            .post("/api/auth/register")
+            .send(VALID_PAYLOAD);
 
         expect(res.body.data.user.roles).toBe("USER");
     });
 
     it("should allow registering as SELLER when roles=SELLER is provided", async () => {
         const res = await request(app)
-            .post("/auth/register")
+            .post("/api/auth/register")
             .send({ ...VALID_PAYLOAD, roles: "SELLER" });
 
         expect(res.status).toBe(201);
@@ -83,11 +99,15 @@ describe("POST /auth/register", () => {
     });
 
     it("should set a httpOnly refreshToken cookie on success", async () => {
-        const res = await request(app).post("/auth/register").send(VALID_PAYLOAD);
+        const res = await request(app)
+            .post("/api/auth/register")
+            .send(VALID_PAYLOAD);
 
         const cookies = res.headers["set-cookie"];
         expect(cookies).toBeDefined();
-        const refreshCookie = cookies.find((c) => c.startsWith("refreshToken="));
+        const refreshCookie = cookies.find((c) =>
+            c.startsWith("refreshToken="),
+        );
         expect(refreshCookie).toBeDefined();
         expect(refreshCookie).toMatch(/HttpOnly/i);
     });
@@ -96,7 +116,7 @@ describe("POST /auth/register", () => {
 
     it("should return 400 when email is missing", async () => {
         const { email, ...payload } = VALID_PAYLOAD;
-        const res = await request(app).post("/auth/register").send(payload);
+        const res = await request(app).post("/api/auth/register").send(payload);
 
         expect(res.status).toBe(400);
         expect(res.body.success).toBe(false);
@@ -105,7 +125,7 @@ describe("POST /auth/register", () => {
 
     it("should return 400 when password is missing", async () => {
         const { password, ...payload } = VALID_PAYLOAD;
-        const res = await request(app).post("/auth/register").send(payload);
+        const res = await request(app).post("/api/auth/register").send(payload);
 
         expect(res.status).toBe(400);
         expect(res.body.success).toBe(false);
@@ -113,7 +133,7 @@ describe("POST /auth/register", () => {
 
     it("should return 400 when username is missing", async () => {
         const { username, ...payload } = VALID_PAYLOAD;
-        const res = await request(app).post("/auth/register").send(payload);
+        const res = await request(app).post("/api/auth/register").send(payload);
 
         expect(res.status).toBe(400);
         expect(res.body.success).toBe(false);
@@ -121,7 +141,7 @@ describe("POST /auth/register", () => {
 
     it("should return 400 when fullname.firstname is missing", async () => {
         const res = await request(app)
-            .post("/auth/register")
+            .post("/api/auth/register")
             .send({ ...VALID_PAYLOAD, fullname: { lastname: "Doe" } });
 
         expect(res.status).toBe(400);
@@ -130,7 +150,7 @@ describe("POST /auth/register", () => {
 
     it("should return 400 when fullname.lastname is missing", async () => {
         const res = await request(app)
-            .post("/auth/register")
+            .post("/api/auth/register")
             .send({ ...VALID_PAYLOAD, fullname: { firstname: "John" } });
 
         expect(res.status).toBe(400);
@@ -141,11 +161,11 @@ describe("POST /auth/register", () => {
 
     it("should return 409 when email is already registered", async () => {
         // pehle register karo
-        await request(app).post("/auth/register").send(VALID_PAYLOAD);
+        await request(app).post("/api/auth/register").send(VALID_PAYLOAD);
 
         // same email, alag username se dobara try karo
         const res = await request(app)
-            .post("/auth/register")
+            .post("/api/auth/register")
             .send({ ...VALID_PAYLOAD, username: "another_user" });
 
         expect(res.status).toBe(409);
@@ -154,11 +174,11 @@ describe("POST /auth/register", () => {
     });
 
     it("should return 409 when username is already taken", async () => {
-        await request(app).post("/auth/register").send(VALID_PAYLOAD);
+        await request(app).post("/api/auth/register").send(VALID_PAYLOAD);
 
         // same username, alag email
         const res = await request(app)
-            .post("/auth/register")
+            .post("/api/auth/register")
             .send({ ...VALID_PAYLOAD, email: "other@example.com" });
 
         expect(res.status).toBe(409);
@@ -169,11 +189,12 @@ describe("POST /auth/register", () => {
     // ── Password security ─────────────────────────────────────────────────────
 
     it("should store a hashed password (not plaintext) in the database", async () => {
-        await request(app).post("/auth/register").send(VALID_PAYLOAD);
+        await request(app).post("/api/auth/register").send(VALID_PAYLOAD);
 
-        // DB se directly user fetch karo aur password check karo
-        const { userModel } = await import("../../src/models/user.model.js");
-        const dbUser = await userModel.findOne({ email: VALID_PAYLOAD.email });
+        // mongoose.connection.db se raw query — module instance isolation se bachne ke liye
+        const dbUser = await mongoose.connection.db
+            .collection("users")
+            .findOne({ email: VALID_PAYLOAD.email });
 
         expect(dbUser).not.toBeNull();
         // plaintext nahi hona chahiye
