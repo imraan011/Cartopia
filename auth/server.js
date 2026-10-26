@@ -1,9 +1,13 @@
-import { app } from "./src/app";
+import { app } from "./src/app.js";
+import { connectToDatabase } from "./src/db/db.js";
+import dotenv from "dotenv";
+dotenv.config();
+
+connectToDatabase();
 
 app.listen(3000, () => {
     console.log("Server is running on port 3000");
 });
-
 
 // POST /auth/register – Create account as USER or SELLER. Validates email uniqueness, hashes password, issues refresh+access tokens. Emits user.created.
 // POST /auth/login – Email+password login. On success: httpOnly refresh cookie + short-lived access token in body; logs device metadata.
