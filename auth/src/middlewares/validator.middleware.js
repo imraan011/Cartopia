@@ -14,7 +14,7 @@ const responseWithValidationErrors = (req, res, next) => {
     next();
 };
 
-const registerUserValidations = [
+export const registerUserValidations = [
     body("username")
         .isString()
         .withMessage("username must be a string")
@@ -36,4 +36,6 @@ const registerUserValidations = [
         .withMessage("fullname.lastname must be a string")
         .notEmpty()
         .withMessage("fullname.lastname is required"),
+
+    responseWithValidationErrors,
 ];
