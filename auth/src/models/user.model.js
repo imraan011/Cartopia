@@ -1,5 +1,6 @@
-import { Mongoose } from "mongoose";
-const addressSchema = new Mongoose.Schema({
+import mongoose from "mongoose";
+
+const addressSchema = new mongoose.Schema({
     street: { type: String, required: true },
     city: { type: String, required: true },
     state: { type: String, required: true },
@@ -7,7 +8,7 @@ const addressSchema = new Mongoose.Schema({
     country: { type: String, required: true },
 });
 
-const userSchema = new Mongoose.Schema({
+const userSchema = new mongoose.Schema({
     username: { type: String, required: true, unique: true },
     email: { type: String, required: true, unique: true },
     password: { type: String },
@@ -19,4 +20,4 @@ const userSchema = new Mongoose.Schema({
     addresses: [addressSchema],
 });
 
-export const userModel = Mongoose.model("User", userSchema);
+export const userModel = mongoose.model("User", userSchema);
