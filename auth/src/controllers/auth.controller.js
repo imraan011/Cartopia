@@ -4,7 +4,7 @@ import { userModel } from "../models/user.model.js";
 
 // register karta hai naya user
 export async function registerUser(req, res) {
-    const { username, email, password, fullname } = req.body;
+    const { username, email, password, fullname, roles } = req.body;
 
     // email/username duplicate check
     const existing = await userModel.findOne({
@@ -28,12 +28,28 @@ export async function registerUser(req, res) {
         fullname,
     });
 
-    
-    
+    // JWT token generate karo
+    const token = jwt.sign(
+        {
+            id: user._id,
+            username: user.username,
+            email: user.email,
+            roles: user.roles,
+        },
+        process.env.JWT_SECRET,
+    );
+
+    // set cookie with the token
+    res.cookie("token", token, {
+        httpOnly: true,
+        secure: true, // set to true in production
+        maxAge: 1000 * 60 * 60 * 24, // 1 day
+    });
+
     return res.status(201).json({
         success: true,
         data: {
-            accessToken,
+            accessToken: token,
             user: {
                 id: user._id,
                 username: user.username,
