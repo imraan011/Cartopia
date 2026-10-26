@@ -8,4 +8,4 @@ app.use(express.json());
 app.use(cookieParser());
 
 // sab auth routes /auth prefix ke saath mount karo
-app.use("/auth", authRouter);
+app.use("/api/auth", authRouter);
