@@ -6,6 +6,8 @@ import { userModel } from "../models/user.model.js";
 export async function register(req, res) {
     const { username, email, password, fullname, roles } = req.body;
 
+    
+
     // basic validation — required fields check
     if (!username || !email || !password || !fullname?.firstname || !fullname?.lastname) {
         return res.status(400).json({
