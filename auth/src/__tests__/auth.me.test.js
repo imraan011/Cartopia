@@ -4,21 +4,10 @@
  * Spec: Returns current user (id, roles, profile). Requires valid access token.
  */
 
-import {
-    describe,
-    it,
-    expect,
-    beforeAll,
-    afterAll,
-    afterEach,
-} from "@jest/globals";
-import { MongoMemoryServer } from "mongodb-memory-server";
-import mongoose from "mongoose";
+import { describe, it, expect } from "@jest/globals";
 import "dotenv/config";
 import request from "supertest";
 import { app } from "../../src/app.js";
-
-let mongoServer;
 
 const TEST_USER = {
     username: "john_doe",
@@ -26,25 +15,6 @@ const TEST_USER = {
     password: "Secret@123",
     fullname: { firstname: "John", lastname: "Doe" },
 };
-
-// ── Lifecycle ─────────────────────────────────────────────────────────────────
-
-beforeAll(async () => {
-    mongoServer = await MongoMemoryServer.create();
-    await mongoose.connect(mongoServer.getUri());
-});
-
-afterAll(async () => {
-    await mongoose.disconnect();
-    await mongoServer.stop();
-});
-
-afterEach(async () => {
-    const collections = mongoose.connection.collections;
-    for (const key in collections) {
-        await collections[key].deleteMany({});
-    }
-});
 
 // Helper to register user and obtain valid access token
 const getValidAccessToken = async () => {

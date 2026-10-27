@@ -5,20 +5,12 @@
  * supertest hits the actual express app in-process (no network bind needed).
  */
 
-import {
-    describe,
-    it,
-    expect,
-    beforeAll,
-    afterAll,
-    afterEach,
-} from "@jest/globals";
-import { MongoMemoryServer } from "mongodb-memory-server";
+import { describe, it, expect } from "@jest/globals";
 import mongoose from "mongoose";
 import "dotenv/config";
 import request from "supertest";
 import { app } from "../../src/app.js";
-// same mongoose instance share karta hai jo beforeAll me connect hoti hai
+// same mongoose instance share karta hai jo setup.js me connect hoti hai
 import { userModel } from "../../src/models/user.model.js";
 
 // valid payload — saare required fields present
@@ -28,29 +20,6 @@ const VALID_PAYLOAD = {
     password: "Secret@123",
     fullname: { firstname: "John", lastname: "Doe" },
 };
-
-let mongoServer;
-
-// ── lifecycle ─────────────────────────────────────────────────────────────────
-
-beforeAll(async () => {
-    // In-memory MongoDB instance start karo — real DB se bilkul alag
-    mongoServer = await MongoMemoryServer.create();
-    await mongoose.connect(mongoServer.getUri());
-});
-
-afterAll(async () => {
-    await mongoose.disconnect();
-    await mongoServer.stop();
-});
-
-// har test ke baad collection saaf karo — izolation ke liye
-afterEach(async () => {
-    const collections = mongoose.connection.collections;
-    for (const key in collections) {
-        await collections[key].deleteMany({});
-    }
-});
 
 // ── test cases ────────────────────────────────────────────────────────────────
 

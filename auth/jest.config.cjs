@@ -9,6 +9,9 @@ module.exports = {
     // sirf __tests__ folder ke andar wale test files chalao
     testMatch: ["**/__tests__/**/*.test.js"],
 
+    // har test file ke pehle shared lifecycle setup run karo
+    setupFilesAfterEnv: ["<rootDir>/src/__tests__/setup.js"],
+
     // verbose output — har test ka naam alag se dikhta hai
     verbose: true,
 };

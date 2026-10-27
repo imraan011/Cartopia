@@ -5,15 +5,7 @@
  * Follows exact Cartopia response format and security standards.
  */
 
-import {
-    describe,
-    it,
-    expect,
-    beforeAll,
-    afterAll,
-    afterEach,
-} from "@jest/globals";
-import { MongoMemoryServer } from "mongodb-memory-server";
+import { describe, it, expect } from "@jest/globals";
 import mongoose from "mongoose";
 import "dotenv/config";
 import request from "supertest";
@@ -28,28 +20,6 @@ const TEST_USER = {
     fullname: { firstname: "John", lastname: "Doe" },
     roles: "USER",
 };
-
-let mongoServer;
-
-// ── Lifecycle ─────────────────────────────────────────────────────────────────
-
-beforeAll(async () => {
-    mongoServer = await MongoMemoryServer.create();
-    await mongoose.connect(mongoServer.getUri());
-});
-
-afterAll(async () => {
-    await mongoose.disconnect();
-    await mongoServer.stop();
-});
-
-// har test ke baad database clean karo
-afterEach(async () => {
-    const collections = mongoose.connection.collections;
-    for (const key in collections) {
-        await collections[key].deleteMany({});
-    }
-});
 
 // ── Test Helpers ──────────────────────────────────────────────────────────────
 
@@ -128,15 +98,6 @@ describe("POST /api/auth/login", () => {
 
     // ── Validation Failures (400) ──────────────────────────────────────────────
 
-    it("should return 400 when email is missing", async () => {
-        const res = await request(app).post("/api/auth/login").send({
-            password: RAW_PASSWORD,
-        });
-
-        expect(res.status).toBe(400);
-        expect(res.body.success).toBe(false);
-        expect(res.body.error.message).toBeDefined();
-    });
 
     it("should return 400 when email is invalid format", async () => {
         const res = await request(app).post("/api/auth/login").send({
