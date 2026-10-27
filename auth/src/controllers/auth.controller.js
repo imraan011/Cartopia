@@ -1,10 +1,16 @@
 import { hash } from "bcryptjs";
 import { createRequire } from "module";
+import { randomBytes } from "crypto";
 import { userModel } from "../models/user.model.js";
 
 // jwt CJS hai — ESM default import me .sign undefined aata hai, isliye createRequire
 const require = createRequire(import.meta.url);
 const jwt = require("jsonwebtoken");
+
+// Production me env se aayega. Dev/test me har restart pe naya random secret —
+// hardcode se kahin better, source code se guess nahi ho sakta.
+const JWT_SECRET = process.env.JWT_SECRET ?? randomBytes(32).toString("hex");
+const JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET ?? randomBytes(32).toString("hex");
 
 // register karta hai naya user
 export async function registerUser(req, res) {
@@ -41,14 +47,14 @@ export async function registerUser(req, res) {
             email: user.email,
             roles: user.roles,
         },
-        process.env.JWT_SECRET ?? "dev-secret",
+        JWT_SECRET,
         { expiresIn: "15m" },
     );
 
     // Refresh token — longer lived (7d), httpOnly cookie me store karo
     const refreshToken = jwt.sign(
         { id: user._id },
-        process.env.JWT_REFRESH_SECRET ?? "dev-refresh-secret",
+        JWT_REFRESH_SECRET,
         { expiresIn: "7d" },
     );
 
