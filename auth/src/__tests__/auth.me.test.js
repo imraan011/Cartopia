@@ -7,7 +7,7 @@
 import { describe, it, expect } from "@jest/globals";
 import "dotenv/config";
 import request from "supertest";
-import { app } from "../../src/app.js";
+import { app } from "../app.js";
 
 const TEST_USER = {
     username: "john_doe",
@@ -18,9 +18,7 @@ const TEST_USER = {
 
 // Helper to register user and obtain valid access token
 const getValidAccessToken = async () => {
-    const res = await request(app)
-        .post("/api/auth/register")
-        .send(TEST_USER);
+    const res = await request(app).post("/api/auth/register").send(TEST_USER);
     return res.body.data.accessToken;
 };
 

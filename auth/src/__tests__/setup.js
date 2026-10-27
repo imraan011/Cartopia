@@ -3,16 +3,21 @@
  * Runs before each test suite via setupFilesAfterEnv in jest.config.cjs.
  */
 
-import { beforeAll, afterAll, afterEach } from "@jest/globals";
+import { beforeAll, afterAll, afterEach, jest } from "@jest/globals";
 import { MongoMemoryServer } from "mongodb-memory-server";
 import mongoose from "mongoose";
+
+// Windows pe MongoDB startup thoda time leta hai
+jest.setTimeout(60000);
 
 let mongoServer;
 
 beforeAll(async () => {
-    mongoServer = await MongoMemoryServer.create();
+    mongoServer = await MongoMemoryServer.create({
+        binary: { version: "6.0.14" },
+    });
     await mongoose.connect(mongoServer.getUri());
-});
+}, 60000);
 
 afterAll(async () => {
     await mongoose.disconnect();

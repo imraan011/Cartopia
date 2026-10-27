@@ -10,7 +10,7 @@ import mongoose from "mongoose";
 import "dotenv/config";
 import request from "supertest";
 import { hash } from "bcryptjs";
-import { app } from "../../src/app.js";
+import { app } from "../app.js";
 
 const RAW_PASSWORD = "Password@123";
 
@@ -97,7 +97,6 @@ describe("POST /api/auth/login", () => {
     });
 
     // ── Validation Failures (400) ──────────────────────────────────────────────
-
 
     it("should return 400 when email is invalid format", async () => {
         const res = await request(app).post("/api/auth/login").send({

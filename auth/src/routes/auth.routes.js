@@ -3,12 +3,20 @@ import {
     loginUserValidations,
     registerUserValidations,
 } from "../middlewares/validator.middleware.js";
-import { loginUser, registerUser } from "../controllers/auth.controller.js";
+import {
+    getMe,
+    loginUser,
+    logoutUser,
+    registerUser,
+} from "../controllers/auth.controller.js";
+import { authMiddleware } from "../middlewares/auth.middleware.js";
 
 const router = Router();
 
-// POST /auth/register
+// auth routes
 router.post("/register", registerUserValidations, registerUser);
 router.post("/login", loginUserValidations, loginUser);
+router.post("/logout", logoutUser);
+router.get("/me", authMiddleware, getMe);
 
 export default router;
