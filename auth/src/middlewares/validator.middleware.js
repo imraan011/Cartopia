@@ -41,7 +41,10 @@ export const registerUserValidations = [
 ];
 
 export const loginUserValidations = [
-    body("email").isEmail().withMessage("email must be a valid email address"),
+    body("email")
+        .optional()
+        .isEmail()
+        .withMessage("email must be a valid email address"),
     body("password")
         .isLength({ min: 8 })
         .withMessage("password must be at least 8 characters long"),
