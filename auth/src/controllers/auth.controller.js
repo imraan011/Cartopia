@@ -1,3 +1,4 @@
+import "dotenv/config";
 import { compare, hash } from "bcryptjs";
 import { createRequire } from "module";
 import { randomBytes } from "crypto";

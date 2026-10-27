@@ -1,7 +1,6 @@
+import "dotenv/config";
 import { app } from "./src/app.js";
 import { connectToDatabase } from "./src/db/db.js";
-import dotenv from "dotenv";
-dotenv.config();
 import dns from "dns";
 dns.setServers(["8.8.8.8", "1.1.1.1"]);
 

@@ -1,3 +1,4 @@
+import "dotenv/config";
 import { createRequire } from "module";
 
 // jwt CJS module hai — ESM compatibility ke liye createRequire use kar rahe hain
