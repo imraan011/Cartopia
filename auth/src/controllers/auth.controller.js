@@ -3,6 +3,7 @@ import { compare, hash } from "bcryptjs";
 import { createRequire } from "module";
 import { randomBytes } from "crypto";
 import { userModel } from "../models/user.model.js";
+import { redis } from "../db/redis.js";
 
 // jwt CJS hai — ESM default import me .sign undefined aata hai, isliye createRequire
 const require = createRequire(import.meta.url);
@@ -179,6 +180,21 @@ export async function getMe(req, res) {
 
 // refresh cookie clear karke logout karta hai
 export async function logoutUser(req, res) {
+    const refreshToken = req.cookies.refreshToken;
+    if (!refreshToken) {
+        return res.status(400).json({
+            success: false,
+            error: { message: "No refresh token provided" },
+        });
+    }
+
+    await redis.set(
+        `blacklist:${refreshToken}`,
+        "true",
+        "EX",
+        7 * 24 * 60 * 60,
+    ); // 7 days in seconds
+
     res.clearCookie("refreshToken");
     return res.status(200).json({
         success: true,
