@@ -39,3 +39,18 @@ export const registerUserValidations = [
 
     responseWithValidationErrors,
 ];
+
+export const loginUserValidations = [
+    body("email").isEmail().withMessage("email must be a valid email address"),
+    body("password")
+        .isLength({ min: 8 })
+        .withMessage("password must be at least 8 characters long"),
+    body("username")
+        .optional()
+        .isString()
+        .withMessage("username must be a string")
+        .isLength({ min: 3 })
+        .withMessage("username must be at least 3 characters long"),
+
+    responseWithValidationErrors,
+];
