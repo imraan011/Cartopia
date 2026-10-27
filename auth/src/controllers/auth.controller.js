@@ -1,4 +1,4 @@
-import { hash } from "bcryptjs";
+import { compare, hash } from "bcryptjs";
 import { createRequire } from "module";
 import { randomBytes } from "crypto";
 import { userModel } from "../models/user.model.js";
@@ -88,7 +88,69 @@ export async function registerUser(req, res) {
 export async function loginUser(req, res) {
     try {
         const { username, email, password } = req.body;
-        
 
-    } catch (error) {}
+        const user = await userModel
+            .findOne({
+                $or: [{ email }, { username }],
+            })
+            .select("+password"); // password field ko explicitly select karo
+
+        if (!user) {
+            return res.status(401).json({
+                success: false,
+                error: { message: "Invalid credentials" },
+            });
+        }
+
+        const isPasswordValid = await  compare(
+            password,
+            user.password || "",
+        );
+
+        if (!isPasswordValid) {
+            return res.status(401).json({
+                success: false,
+                error: { message: "Invalid credentials" },
+            });
+        }
+
+        const accessToken = jwt.sign(
+            {
+                id: user._id,
+                username: user.username,
+                email: user.email,
+                roles: user.roles,
+            },
+            JWT_SECRET,
+            { expiresIn: "15m" },
+        );
+
+        const refreshToken = jwt.sign({ id: user._id }, JWT_REFRESH_SECRET, {
+            expiresIn: "7d",
+        });
+
+        res.cookie("refreshToken", refreshToken, {
+            httpOnly: true,
+            maxAge: 7 * 24 * 60 * 60 * 1000,
+        });
+
+        return res.status(200).json({
+            success: true,
+            data: {
+                accessToken,
+                user: {
+                    id: user._id,
+                    username: user.username,
+                    email: user.email,
+                    roles: user.roles,
+                },
+            },
+        });
+    } catch (error) {
+        console.error("Error in loginUser:", error);
+        return res.status(500).json({
+            success: false,
+            error: { message: "Internal server error" },
+        });
+    }
 }
