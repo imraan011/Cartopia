@@ -5,6 +5,7 @@ import {
 } from "../middlewares/validator.middleware.js";
 import {
     getMe,
+    getUserAddresses,
     loginUser,
     logoutUser,
     registerUser,
@@ -18,5 +19,6 @@ router.post("/register", registerUserValidations, registerUser);
 router.post("/login", loginUserValidations, loginUser);
 router.post("/logout", logoutUser);
 router.get("/me", authMiddleware, getMe);
+router.get("/users/me/addresses", authMiddleware, getUserAddresses);
 
 export default router;

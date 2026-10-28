@@ -200,3 +200,21 @@ export async function logoutUser(req, res) {
         success: true,
     });
 }
+
+export async function getUserAddresses(req, res) {
+    const userId = req.user.id;
+
+    const user = await userModel.findById(userId).select("addresses");
+
+    if (!user) {
+        return res.status(404).json({
+            success: false,
+            error: { message: "User not found" },
+        });
+    }
+
+    return res.status(200).json({
+        success: true,
+        data: { addresses: user.addresses },
+    });
+}
