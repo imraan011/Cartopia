@@ -15,6 +15,42 @@ const JWT_SECRET = process.env.JWT_SECRET ?? randomBytes(32).toString("hex");
 const JWT_REFRESH_SECRET =
     process.env.JWT_REFRESH_SECRET ?? randomBytes(32).toString("hex");
 
+// Auth tokens generate karke cookie set karta hai aur response bhejta hai
+function sendAuthResponse(res, user, statusCode = 200) {
+    const accessToken = jwt.sign(
+        {
+            id: user._id,
+            username: user.username,
+            email: user.email,
+            roles: user.roles,
+        },
+        JWT_SECRET,
+        { expiresIn: "15m" },
+    );
+
+    const refreshToken = jwt.sign({ id: user._id }, JWT_REFRESH_SECRET, {
+        expiresIn: "7d",
+    });
+
+    res.cookie("refreshToken", refreshToken, {
+        httpOnly: true,
+        maxAge: 7 * 24 * 60 * 60 * 1000,
+    });
+
+    return res.status(statusCode).json({
+        success: true,
+        data: {
+            accessToken,
+            user: {
+                id: user._id,
+                username: user.username,
+                email: user.email,
+                roles: user.roles,
+            },
+        },
+    });
+}
+
 // register karta hai naya user
 export async function registerUser(req, res) {
     try {
@@ -43,40 +79,7 @@ export async function registerUser(req, res) {
             roles: roles ?? "USER",
         });
 
-        // Access token — short lived (15m)
-        const accessToken = jwt.sign(
-            {
-                id: user._id,
-                username: user.username,
-                email: user.email,
-                roles: user.roles,
-            },
-            JWT_SECRET,
-            { expiresIn: "15m" },
-        );
-
-        // Refresh token — longer lived (7d), httpOnly cookie me store karo
-        const refreshToken = jwt.sign({ id: user._id }, JWT_REFRESH_SECRET, {
-            expiresIn: "7d",
-        });
-
-        res.cookie("refreshToken", refreshToken, {
-            httpOnly: true,
-            maxAge: 7 * 24 * 60 * 60 * 1000,
-        });
-
-        return res.status(201).json({
-            success: true,
-            data: {
-                accessToken,
-                user: {
-                    id: user._id,
-                    username: user.username,
-                    email: user.email,
-                    roles: user.roles,
-                },
-            },
-        });
+        return sendAuthResponse(res, user, 201);
     } catch (error) {
         console.error("Error in registerUser:", error);
         return res.status(500).json({
@@ -104,7 +107,7 @@ export async function loginUser(req, res) {
             });
         }
 
-        const isPasswordValid = await compare(password, user.password || "");
+        const isPasswordValid = await compare(password, user.password);
 
         if (!isPasswordValid) {
             return res.status(401).json({
@@ -113,38 +116,7 @@ export async function loginUser(req, res) {
             });
         }
 
-        const accessToken = jwt.sign(
-            {
-                id: user._id,
-                username: user.username,
-                email: user.email,
-                roles: user.roles,
-            },
-            JWT_SECRET,
-            { expiresIn: "15m" },
-        );
-
-        const refreshToken = jwt.sign({ id: user._id }, JWT_REFRESH_SECRET, {
-            expiresIn: "7d",
-        });
-
-        res.cookie("refreshToken", refreshToken, {
-            httpOnly: true,
-            maxAge: 7 * 24 * 60 * 60 * 1000,
-        });
-
-        return res.status(200).json({
-            success: true,
-            data: {
-                accessToken,
-                user: {
-                    id: user._id,
-                    username: user.username,
-                    email: user.email,
-                    roles: user.roles,
-                },
-            },
-        });
+        return sendAuthResponse(res, user, 200);
     } catch (error) {
         console.error("Error in loginUser:", error);
         return res.status(500).json({

@@ -7,7 +7,6 @@ import "dotenv/config";
 import { beforeAll, afterAll, afterEach, jest } from "@jest/globals";
 import { MongoMemoryServer } from "mongodb-memory-server";
 import mongoose from "mongoose";
-import { redis } from "../db/redis.js";
 
 // Windows pe MongoDB startup thoda time leta hai
 jest.setTimeout(60000);
@@ -24,7 +23,6 @@ beforeAll(async () => {
 afterAll(async () => {
     await mongoose.disconnect();
     await mongoServer.stop();
-    await redis.quit();
 });
 
 afterEach(async () => {
