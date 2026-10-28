@@ -201,20 +201,109 @@ export async function logoutUser(req, res) {
     });
 }
 
+// user ke addresses fetch karta hai
 export async function getUserAddresses(req, res) {
-    const userId = req.user.id;
+    try {
+        const userId = req.user.id;
+        const user = await userModel.findById(userId).select("addresses");
 
-    const user = await userModel.findById(userId).select("addresses");
+        if (!user) {
+            return res.status(404).json({
+                success: false,
+                error: { message: "User not found" },
+            });
+        }
 
-    if (!user) {
-        return res.status(404).json({
+        return res.status(200).json({
+            success: true,
+            data: { addresses: user.addresses ?? [] },
+        });
+    } catch (error) {
+        return res.status(500).json({
             success: false,
-            error: { message: "User not found" },
+            error: { message: "Internal server error" },
         });
     }
+}
 
-    return res.status(200).json({
-        success: true,
-        data: { addresses: user.addresses },
-    });
+// user ke addresses me naya address add karta hai
+export async function addUserAddress(req, res) {
+    try {
+        const userId = req.user.id;
+        const { street, city, state, pincode, country, phone, isDefault } =
+            req.body;
+
+        const user = await userModel.findOneAndUpdate(
+            { _id: userId },
+            {
+                $push: {
+                    addresses: {
+                        street,
+                        city,
+                        state,
+                        pincode,
+                        country,
+                        phone,
+                        isDefault,
+                    },
+                },
+            },
+            { returnDocument: "after" },
+        );
+
+        if (!user) {
+            return res.status(404).json({
+                success: false,
+                error: { message: "User not found" },
+            });
+        }
+
+        const addedAddress = user.addresses[user.addresses.length - 1];
+
+        return res.status(201).json({
+            success: true,
+            data: {
+                address: addedAddress,
+                addresses: user.addresses,
+            },
+        });
+    } catch (error) {
+        return res.status(500).json({
+            success: false,
+            error: { message: "Internal server error" },
+        });
+    }
+}
+
+// user ka address delete karta hai
+export async function deleteUserAddress(req, res) {
+    try {
+        const userId = req.user.id;
+        const { addressId } = req.params;
+
+        const user = await userModel
+            .findOneAndUpdate(
+                { _id: userId, "addresses._id": addressId },
+                { $pull: { addresses: { _id: addressId } } },
+                { returnDocument: "after" },
+            )
+            .select("addresses");
+
+        if (!user) {
+            return res.status(404).json({
+                success: false,
+                error: { message: "User not found" },
+            });
+        }
+
+        return res.status(200).json({
+            success: true,
+            data: { addresses: user.addresses },
+        });
+    } catch (error) {
+        return res.status(500).json({
+            success: false,
+            error: { message: "Internal server error" },
+        });
+    }
 }
