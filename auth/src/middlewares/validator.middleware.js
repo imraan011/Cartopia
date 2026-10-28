@@ -36,6 +36,10 @@ export const registerUserValidations = [
         .withMessage("fullname.lastname must be a string")
         .notEmpty()
         .withMessage("fullname.lastname is required"),
+    body("roles")
+        .optional()
+        .isIn(["USER", "SELLER"])
+        .withMessage("roles must be either 'USER' or 'SELLER'"),
 
     responseWithValidationErrors,
 ];
