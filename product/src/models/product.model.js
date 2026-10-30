@@ -19,4 +19,17 @@ const productSchema = new mongoose.Schema({
             default: "INR",
         },
     },
+    seller: {
+        type: mongoose.Schema.Types.ObjectId,
+        required: true,
+    },
+    image: [
+        {
+            url: String,
+            thumbnail: String,
+            id: String,
+        },
+    ],
 });
+
+export const ProductModel = mongoose.model("Product", productSchema);
