@@ -1,5 +1,5 @@
 /**
- * Global Jest test setup for auth tests.
+ * Global Jest test setup for product tests.
  * Runs before each test suite via setupFilesAfterEnv in jest.config.cjs.
  */
 
@@ -7,9 +7,8 @@ import "dotenv/config";
 import { beforeAll, afterAll, afterEach, jest } from "@jest/globals";
 import { MongoMemoryServer } from "mongodb-memory-server";
 import mongoose from "mongoose";
-import { redis } from "../db/redis.js";
 
-// Windows pe MongoDB startup thoda time leta hai
+// Windows pe MongoDB startup time le sakta hai
 jest.setTimeout(60000);
 
 let mongoServer;
@@ -24,7 +23,6 @@ beforeAll(async () => {
 afterAll(async () => {
     await mongoose.disconnect();
     await mongoServer.stop();
-    await redis.quit();
 });
 
 afterEach(async () => {

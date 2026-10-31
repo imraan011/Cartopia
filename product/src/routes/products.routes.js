@@ -1,5 +1,11 @@
-import express from "express";
+import { Router } from "express";
 
-export default productsRouter = express.Router();
+const router = Router();
 
-productsRouter.post("/");
+// POST /api/products route
+router.post("/", (req, res) => {
+    // Controller implementation ke liye placeholder
+    res.status(501).json({ message: "Not implemented" });
+});
+
+export default router;
