@@ -1,6 +1,9 @@
+import { promises } from "supertest/lib/test";
+
 export async function productController(req, res) {
     try {
         const { title, desription, price } = req.body;
+        //price is an object with amount and currency
 
         if (!title || !amount) {
             return res
@@ -10,19 +13,15 @@ export async function productController(req, res) {
 
         const sellerId = req.user.id; //extract seller id from the authenticated user
 
-        // const price={
-        //     amount: Number(amount),
-        //     currency: currency || "INR", //default currency is INR
-        // }
+        const images = [];
 
-        const product = await Product.create({
-            title,
-            desription,
-            price,
-            sellerId,
-        });
-
-
+        const file = await Promise.all(
+            (req.files || []).map((file) =>
+                uploadImage({
+                    buffer: file.buffer,
+                }),
+            ),
+        );
     } catch (error) {
         return res.status(500).json({ message: "Internal Server Error" });
     }
