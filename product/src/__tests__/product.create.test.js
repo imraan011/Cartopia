@@ -53,7 +53,7 @@ describe("POST /api/products", () => {
                 .field("description", "Wireless over-ear premium headphones")
                 .field("price[amount]", 4999)
                 .field("price[currency]", "INR")
-                .attach("image", sampleImage, "headphones.png");
+                .attach("images", sampleImage, "headphones.png");
 
             expect(res.status).toBe(201);
             expect(res.body.success).toBe(true);

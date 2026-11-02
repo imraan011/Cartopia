@@ -1,5 +1,3 @@
-import { promises } from "supertest/lib/test";
-
 export async function productController(req, res) {
     try {
         const { title, desription, price } = req.body;
