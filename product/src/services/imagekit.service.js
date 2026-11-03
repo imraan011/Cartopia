@@ -1,16 +1,21 @@
-import imagekit from "imagekit";
-import uuid from "uuid";
+import ImageKit from "imagekit";
+import { v4 as uuidv4 } from "uuid";
 
-export const imagekit = new imagekit({
+// ImageKit client — env vars se configure hoga
+const imagekitClient = new ImageKit({
     publicKey: process.env.IMAGEKIT_PUBLIC_KEY,
     privateKey: process.env.IMAGEKIT_PRIVATE_KEY,
     urlEndpoint: process.env.IMAGEKIT_URL_ENDPOINT,
 });
 
+/**
+ * Uploads an image buffer to ImageKit.
+ * Returns normalized { url, thumbnailUrl, id } shape.
+ */
 export async function uploadImage({ buffer, folder = "/products" }) {
-    const result = await imagekit.upload({
+    const result = await imagekitClient.upload({
         file: buffer,
-        fileName: uuid.v4(),
+        fileName: uuidv4(),
         folder,
     });
     return {
