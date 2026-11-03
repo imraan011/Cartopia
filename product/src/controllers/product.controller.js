@@ -6,7 +6,7 @@ export async function productController(req, res) {
         const { title, description, price } = req.body;
         const sellerId = req.user.id || req.user._id;
 
-        // Image required check — validator file check nahi karta
+        // Kam se kam ek image zaroori hai
         if (!req.files || req.files.length === 0) {
             return res.status(400).json({
                 success: false,
@@ -14,7 +14,7 @@ export async function productController(req, res) {
             });
         }
 
-        // ImageKit pe upload karo (mocked in tests)
+        // ImageKit pe upload (test mode me mock ho jayega)
         const uploadedImages = await Promise.all(
             req.files.map((file) => uploadImage({ buffer: file.buffer })),
         );
@@ -36,8 +36,6 @@ export async function productController(req, res) {
             data: { product },
         });
     } catch (error) {
-        // Temporary debug — test me error dekhnay ke liye
-        console.error("productController error:", error.message, error.stack);
         return res.status(500).json({
             success: false,
             error: { message: "Internal server error" },

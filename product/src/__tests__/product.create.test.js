@@ -8,23 +8,13 @@
  * 4. Saves seller ID from JWT token payload into product document.
  */
 
-import { describe, it, expect, jest } from "@jest/globals";
+import { describe, it, expect } from "@jest/globals";
 import "dotenv/config";
 import request from "supertest";
 import mongoose from "mongoose";
 import jwt from "jsonwebtoken";
 import { app } from "../app.js";
 import { ProductModel } from "../models/product.model.js";
-
-// ImageKit real API call mock karo — tests me actual upload nahi hona chahiye
-jest.mock("../services/imagekit.service.js", () => ({
-    uploadImage: jest.fn().mockResolvedValue({
-        url: "https://ik.imagekit.io/test/headphones.png",
-        thumbnailUrl:
-            "https://ik.imagekit.io/test/tr:n-ik_ml_thumbnail/headphones.png",
-        id: "mock_file_id_123",
-    }),
-}));
 
 const JWT_SECRET = process.env.JWT_SECRET || "test_jwt_secret";
 
